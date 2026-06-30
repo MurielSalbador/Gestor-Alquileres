@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum TipoPersona {
+  DUENO
+  INQUILINO
+  GARANTE
+}
+
+enum TipoPropiedad {
+  DEPARTAMENTO
+  CASA
+  LOCAL
+  OFICINA
+  OTRO
+}
+
+enum TipoIndice {
+  ICL
+  IPC
+  CASA_PROPIA
+  FIJO
+}
+
+enum Moneda {
+  ARS
+  USD
+}
+
+enum EstadoAjuste {
+  aplicado
+  pendiente
+  sin_datos
+}
+
+enum EstadoPago {
+  pendiente
+  pagado
+  vencido
+}
+
+model Persona {
+  id        String      @id @default(cuid())
+  nombre    String
+  tipo      TipoPersona
+  email     String?
+  telefono  String?
+  createdAt DateTime    @default(now())
+
+  propiedades         Propiedad[] @relation("Propietario")
+  contratosInquilino  Contrato[]  @relation("Inquilino")
+  contratosGarante    Contrato[]  @relation("Garante")
+  liquidaciones       Liquidacion[]
+}
+
+model Propiedad {
+  id            String        @id @default(cuid())
+  direccion     String
+  tipo          TipoPropiedad
+  propietarioId String
+  propietario   Persona       @relation("Propietario", fields: [propietarioId], references: [id])
+  createdAt     DateTime      @default(now())
+
+  contratos Contrato[]
+
+  @@index([propietarioId])
+}
+
+model Contrato {
+  id               String     @id @default(cuid())
+  propiedadId      String
+  propiedad        Propiedad  @relation(fields: [propiedadId], references: [id])
+  inquilinoId      String
+  inquilino        Persona    @relation("Inquilino", fields: [inquilinoId], references: [id])
+  garanteId        String?
+  garante          Persona?   @relation("Garante", fields: [garanteId], references: [id])
+
+  fechaInicio      DateTime
+  fechaFin         DateTime
+  montoInicial     Decimal    @db.Decimal(14, 2)
+  moneda           Moneda     @default(ARS)
+  indice           TipoIndice
+  frecuenciaMeses  Int
+  porcentajeFijo   Decimal?   @db.Decimal(6, 2)
+  diaPago          Int        @default(10)
+  comisionPct      Decimal    @default(0) @db.Decimal(5, 2)
+
+  createdAt        DateTime   @default(now())
+
+  ajustes Ajuste[]
+  pagos   Pago[]
+
+  @@index([propiedadId])
+  @@index([inquilinoId])
+  @@index([fechaFin])
+}
+
+model Ajuste {
+  id             String       @id @default(cuid())
+  contratoId     String
+  contrato       Contrato     @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  fecha          DateTime
+  montoAnterior  Decimal      @db.Decimal(14, 2)
+  coeficiente    Decimal      @db.Decimal(10, 6)
+  montoNuevo     Decimal      @db.Decimal(14, 2)
+  estado         EstadoAjuste
+
+  @@unique([contratoId, fecha])
+  @@index([fecha])
+}
+
+model Pago {
+  id         String     @id @default(cuid())
+  contratoId String
+  contrato   Contrato   @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+  periodo    DateTime
+  monto      Decimal    @db.Decimal(14, 2)
+  fechaPago  DateTime?
+  estado     EstadoPago @default(pendiente)
+  reciboUrl  String?
+
+  @@unique([contratoId, periodo])
+  @@index([periodo])
+  @@index([estado])
+}
+
+model ValorIndice {
+  id     String     @id @default(cuid())
+  tipo   TipoIndice
+  fecha  DateTime
+  valor  Decimal    @db.Decimal(14, 6)
+
+  @@unique([tipo, fecha])
+  @@index([tipo, fecha])
+}
+
+model Liquidacion {
+  id            String   @id @default(cuid())
+  propietarioId String
+  propietario   Persona  @relation(fields: [propietarioId], references: [id])
+  periodo       DateTime
+  bruto         Decimal  @db.Decimal(14, 2)
+  comision      Decimal  @db.Decimal(14, 2)
+  neto          Decimal  @db.Decimal(14, 2)
+
+  @@unique([propietarioId, periodo])
+}
