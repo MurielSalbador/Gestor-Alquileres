@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import type { EstadoPago } from "@/app/generated/prisma/enums";
+import type { EstadoPago } from "@prisma/client";
 
 export async function marcarPagado(formData: FormData) {
   const pagoId = String(formData.get("pagoId") ?? "");

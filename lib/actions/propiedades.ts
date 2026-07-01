@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import type { TipoPropiedad } from "@/app/generated/prisma/enums";
+import type { TipoPropiedad } from "@prisma/client";
 
 export async function crearPropiedad(formData: FormData) {
   const direccion = String(formData.get("direccion") ?? "").trim();

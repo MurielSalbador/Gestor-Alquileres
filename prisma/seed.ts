@@ -1,4 +1,4 @@
-import { PrismaClient } from "../app/generated/prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { getSerieIPC } from "../lib/indices/indec";
 import { recalcularYGuardarAjustes } from "../lib/ajustes-calc";
 

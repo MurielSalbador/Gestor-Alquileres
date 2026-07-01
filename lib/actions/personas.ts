@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import type { TipoPersona } from "@/app/generated/prisma/enums";
+import type { TipoPersona } from "@prisma/client";
 
 export async function crearPersona(formData: FormData) {
   const nombre = String(formData.get("nombre") ?? "").trim();

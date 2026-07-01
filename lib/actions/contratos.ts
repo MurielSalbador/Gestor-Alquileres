@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import type { TipoIndice, Moneda } from "@/app/generated/prisma/enums";
+import type { TipoIndice, Moneda } from "@prisma/client";
 import { recalcularAjustes } from "@/lib/actions/ajustes";
 
 export async function crearContrato(formData: FormData) {

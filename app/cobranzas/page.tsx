@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { marcarPagado, marcarVencido, generarPagosDelMes } from "@/lib/actions/pagos";
 import { formatFecha, formatMoneda, formatPeriodo } from "@/lib/format";
 import { IconCash, IconCard, IconHome, IconSearch, IconCheck } from "@/components/icons";
-import type { EstadoPago } from "@/app/generated/prisma/enums";
+import type { EstadoPago } from "@prisma/client";
 
 const ESTADOS: EstadoPago[] = ["pendiente", "pagado", "vencido"];
 
